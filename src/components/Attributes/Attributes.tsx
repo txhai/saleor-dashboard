@@ -1,9 +1,11 @@
+import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import IconButton from "@material-ui/core/IconButton";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import Typography from "@material-ui/core/Typography";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import DeleteIcon from "@material-ui/icons/Delete";
 import CardTitle from "@saleor/components/CardTitle";
 import Grid from "@saleor/components/Grid";
 import Hr from "@saleor/components/Hr";
@@ -17,6 +19,7 @@ import { AttributeValueFragment } from "@saleor/fragments/types/AttributeValueFr
 import { PageErrorWithAttributesFragment } from "@saleor/fragments/types/PageErrorWithAttributesFragment";
 import { ProductErrorWithAttributesFragment } from "@saleor/fragments/types/ProductErrorWithAttributesFragment";
 import { FormsetAtomicData, FormsetChange } from "@saleor/hooks/useFormset";
+import { commonMessages } from "@saleor/intl";
 import { AttributeInputTypeEnum } from "@saleor/types/globalTypes";
 import { getProductErrorMessage } from "@saleor/utils/errors";
 import getPageErrorMessage from "@saleor/utils/errors/page";
@@ -79,8 +82,19 @@ const useStyles = makeStyles(
       display: "flex",
       flex: 1
     },
+    fileField: {
+      display: "none"
+    },
     rotate: {
       transform: "rotate(180deg)"
+    },
+    uploadFileButton: {
+      float: "right"
+    },
+    uploadFileContent: {
+      color: theme.palette.primary.main,
+      float: "right",
+      fontSize: "1rem"
     }
   }),
   { name: "Attributes" }
@@ -148,6 +162,7 @@ const Attributes: React.FC<AttributesProps> = ({
   const classes = useStyles({});
   const [expanded, setExpansionStatus] = React.useState(true);
   const toggleExpansion = () => setExpansionStatus(!expanded);
+  const upload = React.useRef(null);
 
   return (
     <Card className={classes.card}>
@@ -202,7 +217,49 @@ const Attributes: React.FC<AttributesProps> = ({
                     </div>
                     <div data-test="attribute-value">
                       {attribute.data.inputType ===
-                      AttributeInputTypeEnum.DROPDOWN ? (
+                        AttributeInputTypeEnum.FILE ||
+                      true /* TODO: REMOVE TEMP true */ ? (
+                        <>
+                          {upload.current?.files.length > 0 ? (
+                            <div className={classes.uploadFileContent}>
+                              {upload.current?.files[0].name}
+                              <IconButton
+                                color="primary"
+                                onClick={() =>
+                                  onChange(attribute.id, undefined)
+                                }
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </div>
+                          ) : (
+                            <>
+                              <Button
+                                onClick={() => upload.current.click()}
+                                disabled={disabled}
+                                variant="outlined"
+                                color="primary"
+                                className={classes.uploadFileButton}
+                                data-test="button-upload-file"
+                              >
+                                {intl.formatMessage(commonMessages.chooseFile)}
+                              </Button>
+                            </>
+                          )}
+                          <input
+                            className={classes.fileField}
+                            id="fileUpload"
+                            onChange={event =>
+                              onChange(attribute.id, event.target.files)
+                            }
+                            type="file"
+                            name={`attribute:${attribute.label}`}
+                            // value={attribute.value} // TODO: check if it works
+                            ref={upload}
+                          />
+                        </>
+                      ) : attribute.data.inputType ===
+                        AttributeInputTypeEnum.DROPDOWN ? (
                         <SingleAutocompleteSelectField
                           choices={getSingleChoices(attribute.data.values)}
                           disabled={disabled}

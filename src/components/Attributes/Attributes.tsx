@@ -217,8 +217,7 @@ const Attributes: React.FC<AttributesProps> = ({
                     </div>
                     <div data-test="attribute-value">
                       {attribute.data.inputType ===
-                        AttributeInputTypeEnum.FILE ||
-                      true /* TODO: REMOVE TEMP true */ ? (
+                      AttributeInputTypeEnum.FILE ? (
                         <>
                           {upload.current?.files.length > 0 ? (
                             <div className={classes.uploadFileContent}>

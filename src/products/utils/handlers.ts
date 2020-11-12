@@ -5,6 +5,18 @@ import { toggle } from "@saleor/utils/lists";
 
 import { getAttributeInputFromProductType, ProductType } from "./data";
 
+export function createAttributeFileChangeHandler(
+  // changeAttributeData: FormsetChange<string[]>,
+  changeAttributeFile: FormsetChange<File>,
+  triggerChange: () => void
+): FormsetChange<File> {
+  return (attributeId: string, value: File) => {
+    triggerChange();
+    // changeAttributeData(attributeId, [value]); // This should be called after uploading files
+    changeAttributeFile(attributeId, value);
+  };
+}
+
 export function createAttributeChangeHandler(
   changeAttributeData: FormsetChange<string[]>,
   triggerChange: () => void

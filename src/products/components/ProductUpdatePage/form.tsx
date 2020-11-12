@@ -1,4 +1,5 @@
 import { OutputData } from "@editorjs/editorjs";
+import { attribute } from "@saleor/attributes/fixtures";
 import { AttributeInput } from "@saleor/components/Attributes";
 import { MetadataFormData } from "@saleor/components/Metadata";
 import { MultiAutocompleteChoiceType } from "@saleor/components/MultiAutocompleteSelectField";
@@ -17,12 +18,18 @@ import {
 } from "@saleor/products/utils/data";
 import {
   createAttributeChangeHandler,
+  createAttributeFileChangeHandler,
   createAttributeMultiChangeHandler
 } from "@saleor/products/utils/handlers";
 import { SearchWarehouses_search_edges_node } from "@saleor/searches/types/SearchWarehouses";
+import {
+  AttributeInputTypeEnum,
+  AttributeValueInput
+} from "@saleor/types/globalTypes";
 import handleFormSubmit from "@saleor/utils/handlers/handleFormSubmit";
 import createMultiAutocompleteSelectHandler from "@saleor/utils/handlers/multiAutocompleteSelectChangeHandler";
 import createSingleAutocompleteSelectHandler from "@saleor/utils/handlers/singleAutocompleteSelectChangeHandler";
+import { removeAtIndex } from "@saleor/utils/lists";
 import getMetadata from "@saleor/utils/metadata/getMetadata";
 import useMetadataChangeTrigger from "@saleor/utils/metadata/useMetadataChangeTrigger";
 import useRichText from "@saleor/utils/richText/useRichText";
@@ -52,6 +59,13 @@ export interface ProductUpdateFormData extends MetadataFormData {
   visibleInListings: boolean;
   weight: string;
 }
+export interface FileAttributeInput {
+  attributeId: string;
+  file: File;
+}
+export interface FileAttributesSubmitData {
+  fileAttributes: FileAttributeInput[];
+}
 export interface ProductUpdateData extends ProductUpdateFormData {
   attributes: AttributeInput[];
   description: OutputData;
@@ -59,6 +73,8 @@ export interface ProductUpdateData extends ProductUpdateFormData {
 }
 export interface ProductUpdateSubmitData extends ProductUpdateFormData {
   attributes: AttributeInput[];
+  addFileAttributes: FileAttributeInput[];
+  removeFileAttributeValues: AttributeInput[];
   collections: string[];
   description: OutputData;
   addStocks: ProductStockInput[];
@@ -78,7 +94,11 @@ interface ProductUpdateHandlers
       "changeStock" | "selectAttribute" | "selectAttributeMultiple",
       FormsetChange<string>
     >,
-    Record<"addStock" | "deleteStock", (id: string) => void> {
+    Record<"addAttributeFile", FormsetChange<File>>,
+    Record<
+      "deleteAttributeFile" | "addStock" | "deleteStock",
+      (id: string) => void
+    > {
   changeDescription: RichTextEditorChange;
 }
 export interface UseProductUpdateFormResult {
@@ -144,6 +164,50 @@ const getStocksData = (
   };
 };
 
+const getAttributesData = (
+  attributes: AttributeInput[],
+  addFileAttributes: FileAttributeInput[],
+  removeFileAttributes: AttributeInput[]
+) => {
+  const addFileAttributesInput: AttributeInput[] = addFileAttributes.map(
+    fileAttribute => {
+      const attribute = attributes.find(
+        attribute => attribute.id === fileAttribute.attributeId
+      );
+      return {
+        ...attribute,
+        data: {
+          ...attribute.data,
+          values: [
+            {
+              __typename: "AttributeValue",
+              id: undefined,
+              name: fileAttribute.file.name,
+              slug: undefined
+            }
+          ]
+        }
+      };
+    }
+  );
+  const restAttributees = attributes
+    .filter(attribute =>
+      addFileAttributes.every(
+        fileAttribute => fileAttribute.attributeId !== attribute.id
+      )
+    )
+    .map(attribute => {
+      const valueRemoved = removeFileAttributes.some(
+        fileAttribute => fileAttribute.id === attribute.id
+      );
+      return valueRemoved
+        ? { ...attribute, data: { ...attribute.data, values: [] } }
+        : attribute;
+    });
+
+  return [...restAttributees, ...addFileAttributesInput];
+};
+
 function useProductUpdateForm(
   product: ProductDetails_product,
   onSubmit: (data: ProductUpdateSubmitData) => SubmitPromise,
@@ -161,6 +225,13 @@ function useProductUpdateForm(
     initial: product?.descriptionJson,
     triggerChange
   });
+  const [addFileAttributes, setAddFileAttributes] = React.useState<
+    FileAttributeInput[]
+  >([]);
+  const [
+    removeFileAttributeValues,
+    setRemoveFileAttributeValues
+  ] = React.useState<AttributeInput[]>([]);
 
   const {
     isMetadataModified,
@@ -192,6 +263,26 @@ function useProductUpdateForm(
     attributes.data,
     triggerChange
   );
+  const handleAttributeFileAdd = (attributeId: string, file: File) => {
+    setAddFileAttributes([...addFileAttributes, { attributeId, file }]);
+    triggerChange();
+  };
+  const handleAttributeFileDelete = (attributeId: string) => {
+    const removeingQueuedInAdded = addFileAttributes.findIndex(
+      attribute => attribute.attributeId === attributeId
+    );
+    if (removeingQueuedInAdded >= 0) {
+      setAddFileAttributes(
+        removeAtIndex(addFileAttributes, removeingQueuedInAdded)
+      );
+    } else {
+      setRemoveFileAttributeValues([
+        ...removeFileAttributeValues,
+        attributes.get(attributeId)
+      ]);
+    }
+    triggerChange();
+  };
   const handleStockChange: FormsetChange<string> = (id, value) => {
     triggerChange();
     stocks.change(id, value);
@@ -218,7 +309,11 @@ function useProductUpdateForm(
 
   const data: ProductUpdateData = {
     ...form.data,
-    attributes: attributes.data,
+    attributes: getAttributesData(
+      attributes.data,
+      addFileAttributes,
+      removeFileAttributeValues
+    ),
     description: description.current,
     stocks: stocks.data
   };
@@ -228,21 +323,26 @@ function useProductUpdateForm(
     ...getAvailabilityData(data),
     ...getStocksData(product, stocks.data),
     ...getMetadata(data, isMetadataModified, isPrivateMetadataModified),
+    addFileAttributes,
     addStocks: [],
     attributes: attributes.data,
-    description: description.current
+    description: description.current,
+    removeFileAttributeValues
   });
 
-  const submit = () => handleFormSubmit(getSubmitData(), onSubmit, setChanged);
+  const submit = async () =>
+    handleFormSubmit(getSubmitData(), onSubmit, setChanged);
 
   return {
     change: handleChange,
     data,
     handlers: {
+      addAttributeFile: handleAttributeFileAdd,
       addStock: handleStockAdd,
       changeDescription,
       changeMetadata,
       changeStock: handleStockChange,
+      deleteAttributeFile: handleAttributeFileDelete,
       deleteStock: handleStockDelete,
       selectAttribute: handleAttributeChange,
       selectAttributeMultiple: handleAttributeMultiChange,

@@ -24,11 +24,13 @@ import {
 import { mapFormsetStockToStockInput } from "@saleor/products/utils/data";
 import { getProductAvailabilityVariables } from "@saleor/products/utils/handlers";
 import { ReorderEvent } from "@saleor/types";
+import { AttributeValueInput } from "@saleor/types/globalTypes";
 import { MutationFetchResult } from "react-apollo";
 import { arrayMove } from "react-sortable-hoc";
 
 export function createUpdateHandler(
   product: ProductDetails_product,
+  uploadFile: (variables: any) => Promise<MutationFetchResult<any>>,
   updateProduct: (
     variables: ProductUpdateVariables
   ) => Promise<MutationFetchResult<ProductUpdate>>,
@@ -37,16 +39,31 @@ export function createUpdateHandler(
   ) => Promise<MutationFetchResult<SimpleProductUpdate>>,
   setProductAvailability: (
     variables: ProductSetAvailabilityForPurchaseVariables
-  ) => Promise<MutationFetchResult<ProductSetAvailabilityForPurchase>>
+  ) => Promise<MutationFetchResult<ProductSetAvailabilityForPurchase>>,
+  removeAttributeValue: (variables: any) => Promise<MutationFetchResult<any>>
 ) {
   return async (data: ProductUpdatePageSubmitData) => {
+    const addedFileAttributes: AttributeValueInput[] = [];
+    data.addFileAttributes.forEach(async fileAttribute => {
+      const uploadFileResult = await uploadFile({
+        file: fileAttribute.file
+      });
+      errors = [...errors, ...uploadFileResult.data.uploadFile.errors];
+      addedFileAttributes.push({
+        id: fileAttribute.attributeId,
+        values: [uploadFileResult.data.uploadFile.data.url]
+      });
+    });
+    const restAttributes = data.attributes.map(attribute => ({
+      id: attribute.id,
+      values: attribute.value[0] === "" ? [] : attribute.value
+    }));
+    const allAttributes = [...restAttributes, ...addedFileAttributes];
+
     const productVariables: ProductUpdateVariables = {
       id: product.id,
       input: {
-        attributes: data.attributes.map(attribute => ({
-          id: attribute.id,
-          values: attribute.value[0] === "" ? [] : attribute.value
-        })),
+        attributes: allAttributes,
         basePrice: decimal(data.basePrice),
         category: data.category,
         chargeTaxes: data.chargeTaxes,
@@ -114,6 +131,16 @@ export function createUpdateHandler(
         ...availabilityResult.data.productSetAvailabilityForPurchase.errors
       ];
     }
+
+    data.removeFileAttributeValues.forEach(async fileAttributeValueId => {
+      const removeAttributeValueResult = await removeAttributeValue({
+        id: fileAttributeValueId
+      });
+      errors = [
+        ...errors,
+        ...removeAttributeValueResult.data.removeAttributeValue.errors
+      ];
+    });
 
     return errors;
   };

@@ -862,6 +862,10 @@ export enum TaxRateType {
   WINE = "WINE",
 }
 
+export enum UploadErrorCode {
+  GRAPHQL_ERROR = "GRAPHQL_ERROR",
+}
+
 export enum UserSortField {
   EMAIL = "EMAIL",
   FIRST_NAME = "FIRST_NAME",
@@ -1049,6 +1053,7 @@ export interface AttributeValueCreateInput {
 export interface AttributeValueInput {
   id?: string | null;
   values: (string | null)[];
+  file?: string | null;
 }
 
 export interface AuthorizationKeyInput {

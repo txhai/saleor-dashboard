@@ -32,6 +32,7 @@ export interface AttributeInputData {
   values: AttributeValueFragment[];
 }
 export type AttributeInput = FormsetAtomicData<AttributeInputData, string[]>;
+export type AttributeFileInput = FormsetAtomicData<AttributeInputData, File[]>;
 export interface AttributesProps {
   attributes: AttributeInput[];
   disabled: boolean;
@@ -40,8 +41,7 @@ export interface AttributesProps {
   >;
   onChange: FormsetChange;
   onMultiChange: FormsetChange;
-  onFileUpload: FormsetChange;
-  onFileDelete: (attributeId: string) => void;
+  onFileChange: FormsetChange;
 }
 
 const useStyles = makeStyles(
@@ -158,8 +158,7 @@ const Attributes: React.FC<AttributesProps> = ({
   errors,
   onChange,
   onMultiChange,
-  onFileUpload,
-  onFileDelete
+  onFileChange
 }) => {
   const intl = useIntl();
   const classes = useStyles({});
@@ -227,9 +226,11 @@ const Attributes: React.FC<AttributesProps> = ({
                             attribute.data.values[0].name
                           }
                           onFileUpload={file =>
-                            onFileUpload(attribute.id, file)
+                            onFileChange(attribute.id, file)
                           }
-                          onFileDelete={() => onFileDelete(attribute.id)}
+                          onFileDelete={() =>
+                            onFileChange(attribute.id, undefined)
+                          }
                         />
                       ) : attribute.data.inputType ===
                         AttributeInputTypeEnum.DROPDOWN ? (

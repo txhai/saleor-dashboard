@@ -3,19 +3,11 @@
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL fragment: AttributeValueFragment
+// GraphQL fragment: FileFragment
 // ====================================================
 
-export interface AttributeValueFragment_file {
+export interface FileFragment {
   __typename: "File";
   url: string;
   contentType: string;
-}
-
-export interface AttributeValueFragment {
-  __typename: "AttributeValue";
-  id: string;
-  name: string | null;
-  slug: string | null;
-  file: AttributeValueFragment_file | null;
 }

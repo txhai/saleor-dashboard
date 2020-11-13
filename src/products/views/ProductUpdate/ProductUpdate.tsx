@@ -2,10 +2,12 @@ import placeholderImg from "@assets/images/placeholder255x255.png";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
+import { useAttributeValueDeleteMutation } from "@saleor/attributes/mutations";
 import ActionDialog from "@saleor/components/ActionDialog";
 import NotFoundPage from "@saleor/components/NotFoundPage";
 import { WindowTitle } from "@saleor/components/WindowTitle";
 import { DEFAULT_INITIAL_SEARCH_DATA } from "@saleor/config";
+import { useFileUploadMutation } from "@saleor/files/mutations";
 import useBulkActions from "@saleor/hooks/useBulkActions";
 import useNavigator from "@saleor/hooks/useNavigator";
 import useNotifier from "@saleor/hooks/useNotifier";
@@ -101,6 +103,8 @@ export const ProductUpdate: React.FC<ProductUpdateProps> = ({ id, params }) => {
       id
     }
   });
+
+  const [uploadFile, uploadFileOpts] = useFileUploadMutation({});
 
   const handleUpdate = (data: ProductUpdateMutationResult) => {
     if (data.productUpdate.errors.length === 0) {
@@ -199,6 +203,11 @@ export const ProductUpdate: React.FC<ProductUpdateProps> = ({ id, params }) => {
     }
   });
 
+  const [
+    deleteAttributeValue,
+    deleteAttributeValueOpts
+  ] = useAttributeValueDeleteMutation({});
+
   const [openModal, closeModal] = createDialogActionHandlers<
     ProductUrlDialog,
     ProductUrlQueryParams
@@ -222,11 +231,11 @@ export const ProductUpdate: React.FC<ProductUpdateProps> = ({ id, params }) => {
     product,
     createUpdateHandler(
       product,
-      variables => fileUpload({ variables }),
+      variables => uploadFile({ variables }),
       variables => updateProduct({ variables }),
       variables => updateSimpleProduct({ variables }),
       variables => setProductAvailability({ variables }),
-      variables => attributeValueDelete({ variables })
+      variables => deleteAttributeValue({ variables })
     ),
     variables => updateMetadata({ variables }),
     variables => updatePrivateMetadata({ variables })
@@ -248,12 +257,14 @@ export const ProductUpdate: React.FC<ProductUpdateProps> = ({ id, params }) => {
   );
 
   const disableFormSave =
+    uploadFileOpts.loading ||
     createProductImageOpts.loading ||
     deleteProductOpts.loading ||
     reorderProductImagesOpts.loading ||
     updateProductOpts.loading ||
     productAvailabilityOpts.loading ||
     reorderProductVariantsOpts.loading ||
+    deleteAttributeValueOpts.loading ||
     loading;
 
   const formTransitionState = getMutationState(

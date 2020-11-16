@@ -211,6 +211,7 @@ export const fragmentVariant = gql`
   ${stockFragment}
   ${weightFragment}
   ${metadataFragment}
+  ${fileFragment}
   fragment ProductVariant on ProductVariant {
     id
     ...MetadataFragment

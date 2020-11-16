@@ -1,14 +1,9 @@
 import { OutputData } from "@editorjs/editorjs";
-import { attribute } from "@saleor/attributes/fixtures";
-import {
-  AttributeFileInput,
-  AttributeInput
-} from "@saleor/components/Attributes";
+import { AttributeInput } from "@saleor/components/Attributes";
 import { MetadataFormData } from "@saleor/components/Metadata";
 import { MultiAutocompleteChoiceType } from "@saleor/components/MultiAutocompleteSelectField";
 import { RichTextEditorChange } from "@saleor/components/RichTextEditor";
 import { SingleAutocompleteChoiceType } from "@saleor/components/SingleAutocompleteSelectField";
-import { AttributeValueFragment } from "@saleor/fragments/types/AttributeValueFragment";
 import useForm, { FormChange, SubmitPromise } from "@saleor/hooks/useForm";
 import useFormset, {
   FormsetAtomicData,
@@ -18,6 +13,7 @@ import useFormset, {
 import { ProductDetails_product } from "@saleor/products/types/ProductDetails";
 import {
   getAttributeInputFromProduct,
+  getAttributesDisplayData,
   getProductUpdatePageFormData,
   getStockInputFromProduct
 } from "@saleor/products/utils/data";
@@ -27,14 +23,9 @@ import {
   createAttributeMultiChangeHandler
 } from "@saleor/products/utils/handlers";
 import { SearchWarehouses_search_edges_node } from "@saleor/searches/types/SearchWarehouses";
-import {
-  AttributeInputTypeEnum,
-  AttributeValueInput
-} from "@saleor/types/globalTypes";
 import handleFormSubmit from "@saleor/utils/handlers/handleFormSubmit";
 import createMultiAutocompleteSelectHandler from "@saleor/utils/handlers/multiAutocompleteSelectChangeHandler";
 import createSingleAutocompleteSelectHandler from "@saleor/utils/handlers/singleAutocompleteSelectChangeHandler";
-import { removeAtIndex } from "@saleor/utils/lists";
 import getMetadata from "@saleor/utils/metadata/getMetadata";
 import useMetadataChangeTrigger from "@saleor/utils/metadata/useMetadataChangeTrigger";
 import useRichText from "@saleor/utils/richText/useRichText";
@@ -168,48 +159,6 @@ const getStocksData = (
       stock => !stockDiff.added.some(addedStock => addedStock === stock.id)
     )
   };
-};
-
-const getAttributesDisplayData = (
-  attributes: AttributeInput[],
-  attributesWithNewFileValue: FormsetData<null, File>
-) => {
-  const attributesWithNewFileValueInput: AttributeInput[] = attributesWithNewFileValue.map(
-    fileAttribute => {
-      const attribute = attributes.find(
-        attribute => attribute.id === fileAttribute.id
-      );
-      return {
-        ...attribute,
-        data: {
-          ...attribute.data,
-          values: [
-            {
-              __typename: "AttributeValue",
-              file: {
-                __typename: "File",
-                contentType: fileAttribute.value.type,
-                url: undefined
-              },
-              id: undefined,
-              name: fileAttribute.value.name,
-              slug: undefined
-            }
-          ]
-        }
-      };
-    }
-  );
-  const attributesWithoutNewFileValueInput = attributes.filter(attribute =>
-    attributesWithNewFileValue.every(
-      attributeWithNewFileValue => attributeWithNewFileValue.id !== attribute.id
-    )
-  );
-
-  return [
-    ...attributesWithoutNewFileValueInput,
-    ...attributesWithNewFileValueInput
-  ];
 };
 
 function useProductUpdateForm(

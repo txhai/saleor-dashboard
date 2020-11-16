@@ -1,3 +1,4 @@
+import { fileFragment } from "@saleor/fragments/file";
 import { pageInfoFragment } from "@saleor/fragments/pageInfo";
 import {
   fragmentMoney,
@@ -196,6 +197,7 @@ export const useProductVariantQuery = makeQuery<
 >(productVariantQuery);
 
 const productVariantCreateQuery = gql`
+  ${fileFragment}
   query ProductVariantCreateData($id: ID!) {
     product(id: $id) {
       id
@@ -217,6 +219,9 @@ const productVariantCreateQuery = gql`
             id
             name
             slug
+            file {
+              ...FileFragment
+            }
           }
         }
       }

@@ -8,6 +8,7 @@ import useFormset, {
 } from "@saleor/hooks/useFormset";
 import {
   getAttributeInputFromVariant,
+  getAttributesDisplayData,
   getStockInputFromVariant
 } from "@saleor/products/utils/data";
 import {
@@ -155,7 +156,10 @@ function useProductVariantUpdateForm(
 
   const data: ProductVariantUpdateData = {
     ...form.data,
-    attributes: attributes.data,
+    attributes: getAttributesDisplayData(
+      attributes.data,
+      attributesWithNewFileValue.data
+    ),
     stocks: stocks.data
   };
   const submitData: ProductVariantUpdateSubmitData = {

@@ -3,7 +3,7 @@ import { MetadataFormData } from "@saleor/components/Metadata/types";
 import { MultiAutocompleteChoiceType } from "@saleor/components/MultiAutocompleteSelectField";
 import { SingleAutocompleteChoiceType } from "@saleor/components/SingleAutocompleteSelectField";
 import { ProductVariant } from "@saleor/fragments/types/ProductVariant";
-import { FormsetAtomicData } from "@saleor/hooks/useFormset";
+import { FormsetAtomicData, FormsetData } from "@saleor/hooks/useFormset";
 import { maybe } from "@saleor/misc";
 import {
   ProductDetails_product,
@@ -169,6 +169,24 @@ export function getChoices(nodes: Node[]): SingleAutocompleteChoiceType[] {
     []
   );
 }
+
+export const getAttributesDisplayData = (
+  attributes: AttributeInput[],
+  attributesWithNewFileValue: FormsetData<null, File>
+) =>
+  attributes.map(attribute => {
+    const attributeWithNewFileValue = attributesWithNewFileValue.find(
+      attributeWithNewFile => attribute.id === attributeWithNewFile.id
+    );
+
+    if (attributeWithNewFileValue) {
+      return {
+        ...attribute,
+        value: [attributeWithNewFileValue.value.name]
+      };
+    }
+    return attribute;
+  });
 
 export interface ProductUpdatePageFormData extends MetadataFormData {
   availableForPurchase: string;

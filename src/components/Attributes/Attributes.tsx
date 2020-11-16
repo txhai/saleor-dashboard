@@ -218,19 +218,17 @@ const Attributes: React.FC<AttributesProps> = ({
                     </div>
                     <div data-test="attribute-value">
                       {attribute.data.inputType ===
-                        AttributeInputTypeEnum.FILE || true ? (
+                      AttributeInputTypeEnum.FILE ? (
                         <FileUploadField
                           disabled={disabled}
-                          fileName={
-                            attribute.data.values.length > 0 &&
-                            attribute.data.values[0].name
-                          }
+                          fileName={attribute.value[0]}
                           onFileUpload={file =>
                             onFileChange(attribute.id, file)
                           }
                           onFileDelete={() =>
                             onFileChange(attribute.id, undefined)
                           }
+                          name={`attribute:${attribute.label}`}
                         />
                       ) : attribute.data.inputType ===
                         AttributeInputTypeEnum.DROPDOWN ? (

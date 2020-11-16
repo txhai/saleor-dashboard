@@ -50,6 +50,7 @@ const FileUploadField: React.FC<FileUploadFieldProps> = props => {
           <IconButton
             color="primary"
             onClick={onFileDelete}
+            disabled={disabled}
             data-test="button-delete-file"
           >
             <DeleteIcon />

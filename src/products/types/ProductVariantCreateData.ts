@@ -15,11 +15,18 @@ export interface ProductVariantCreateData_product_images {
   url: string;
 }
 
+export interface ProductVariantCreateData_product_productType_variantAttributes_values_file {
+  __typename: "File";
+  url: string;
+  contentType: string;
+}
+
 export interface ProductVariantCreateData_product_productType_variantAttributes_values {
   __typename: "AttributeValue";
   id: string;
   name: string | null;
   slug: string | null;
+  file: ProductVariantCreateData_product_productType_variantAttributes_values_file | null;
 }
 
 export interface ProductVariantCreateData_product_productType_variantAttributes {

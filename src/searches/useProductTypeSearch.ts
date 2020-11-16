@@ -1,3 +1,4 @@
+import { fileFragment } from "@saleor/fragments/file";
 import { pageInfoFragment } from "@saleor/fragments/pageInfo";
 import { taxTypeFragment } from "@saleor/fragments/taxes";
 import makeTopLevelSearch from "@saleor/hooks/makeTopLevelSearch";
@@ -11,6 +12,7 @@ import {
 export const searchProductTypes = gql`
   ${pageInfoFragment}
   ${taxTypeFragment}
+  ${fileFragment}
   query SearchProductTypes($after: String, $first: Int!, $query: String!) {
     search: productTypes(
       after: $after
@@ -32,6 +34,9 @@ export const searchProductTypes = gql`
               id
               name
               slug
+              file {
+                ...FileFragment
+              }
             }
           }
           taxType {

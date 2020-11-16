@@ -2,13 +2,17 @@ import { AttributeInput } from "@saleor/components/Attributes";
 import { MetadataFormData } from "@saleor/components/Metadata";
 import { ProductVariant } from "@saleor/fragments/types/ProductVariant";
 import useForm, { FormChange, SubmitPromise } from "@saleor/hooks/useForm";
-import useFormset, { FormsetChange } from "@saleor/hooks/useFormset";
+import useFormset, {
+  FormsetChange,
+  FormsetData
+} from "@saleor/hooks/useFormset";
 import {
   getAttributeInputFromVariant,
   getStockInputFromVariant
 } from "@saleor/products/utils/data";
 import {
   createAttributeChangeHandler,
+  createAttributeFileChangeHandler,
   createAttributeMultiChangeHandler
 } from "@saleor/products/utils/handlers";
 import { SearchWarehouses_search_edges_node } from "@saleor/searches/types/SearchWarehouses";
@@ -35,6 +39,7 @@ export interface ProductVariantUpdateData extends ProductVariantUpdateFormData {
 export interface ProductVariantUpdateSubmitData
   extends ProductVariantUpdateFormData {
   attributes: AttributeInput[];
+  attributesWithNewFileValue: FormsetData<null, File>;
   addStocks: ProductStockInput[];
   updateStocks: ProductStockInput[];
   removeStocks: string[];
@@ -43,17 +48,19 @@ export interface ProductVariantUpdateSubmitData
 export interface UseProductVariantUpdateFormOpts {
   warehouses: SearchWarehouses_search_edges_node[];
 }
+interface ProductUpdateHandlers
+  extends Record<"changeMetadata", FormChange>,
+    Record<
+      "changeStock" | "selectAttribute" | "selectAttributeMultiple",
+      FormsetChange<string>
+    >,
+    Record<"selectAttributeFile", FormsetChange<File>>,
+    Record<"addStock" | "deleteStock", (id: string) => void> {}
 
 export interface UseProductVariantUpdateFormResult {
   change: FormChange;
   data: ProductVariantUpdateData;
-  handlers: Record<
-    "changeStock" | "selectAttribute" | "selectAttributeMultiple",
-    FormsetChange
-  > &
-    Record<"addStock" | "deleteStock", (id: string) => void> & {
-      changeMetadata: FormChange;
-    };
+  handlers: ProductUpdateHandlers;
   hasChanged: boolean;
   submit: () => void;
 }
@@ -88,6 +95,7 @@ function useProductVariantUpdateForm(
 
   const form = useForm(initial);
   const attributes = useFormset(attributeInput);
+  const attributesWithNewFileValue = useFormset<null, File>([]);
   const stocks = useFormset(stockInput);
   const {
     isMetadataModified,
@@ -107,6 +115,13 @@ function useProductVariantUpdateForm(
   const handleAttributeMultiChange = createAttributeMultiChangeHandler(
     attributes.change,
     attributes.data,
+    triggerChange
+  );
+  const handleAttributeFileChange = createAttributeFileChangeHandler(
+    attributes.change,
+    attributesWithNewFileValue.data,
+    attributesWithNewFileValue.add,
+    attributesWithNewFileValue.remove,
     triggerChange
   );
   const handleStockAdd = (id: string) => {
@@ -148,6 +163,7 @@ function useProductVariantUpdateForm(
     ...getMetadata(form.data, isMetadataModified, isPrivateMetadataModified),
     addStocks,
     attributes: attributes.data,
+    attributesWithNewFileValue: attributesWithNewFileValue.data,
     removeStocks: stockDiff.removed,
     updateStocks
   };
@@ -163,6 +179,7 @@ function useProductVariantUpdateForm(
       changeStock: handleStockChange,
       deleteStock: handleStockDelete,
       selectAttribute: handleAttributeChange,
+      selectAttributeFile: handleAttributeFileChange,
       selectAttributeMultiple: handleAttributeMultiChange
     },
     hasChanged: changed,

@@ -32,7 +32,10 @@ import {
   SimpleProductUpdateVariables
 } from "@saleor/products/types/SimpleProductUpdate";
 import { mapFormsetStockToStockInput } from "@saleor/products/utils/data";
-import { getProductAvailabilityVariables } from "@saleor/products/utils/handlers";
+import {
+  getAttributesVariables,
+  getProductAvailabilityVariables
+} from "@saleor/products/utils/handlers";
 import { ReorderEvent } from "@saleor/types";
 import {
   AttributeInputTypeEnum,
@@ -88,36 +91,14 @@ export function createUpdateHandler(
       },
       Promise.resolve<AttributeValueInput[]>([])
     );
-    const attributesWithoutAddedNewFiles = data.attributes
-      .filter(attribute =>
-        data.attributesWithNewFileValue.every(
-          attributeWithNewFileValue =>
-            attributeWithNewFileValue.id !== attribute.id
-        )
-      )
-      .map(attribute => {
-        if (attribute.data.inputType === AttributeInputTypeEnum.FILE) {
-          return {
-            file: attribute.value[0],
-            id: attribute.id,
-            values: []
-          };
-        }
-        return {
-          file: undefined,
-          id: attribute.id,
-          values: attribute.value[0] === "" ? [] : attribute.value
-        };
-      });
-    const attributesInput = [
-      ...attributesWithoutAddedNewFiles,
-      ...attributesWithAddedNewFiles
-    ];
 
     const productVariables: ProductUpdateVariables = {
       id: product.id,
       input: {
-        attributes: attributesInput,
+        attributes: getAttributesVariables({
+          attributes: data.attributes,
+          attributesWithAddedNewFiles
+        }),
         basePrice: decimal(data.basePrice),
         category: data.category,
         chargeTaxes: data.chargeTaxes,

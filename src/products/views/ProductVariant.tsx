@@ -47,6 +47,7 @@ import {
   ProductVariantEditUrlQueryParams
 } from "../urls";
 import { mapFormsetStockToStockInput } from "../utils/data";
+import { getAttributesVariables } from "../utils/handlers";
 import { createVariantReorderHandler } from "./ProductUpdate/handlers";
 
 interface ProductUpdateProps {
@@ -208,36 +209,14 @@ export const ProductVariant: React.FC<ProductUpdateProps> = ({
       },
       Promise.resolve<AttributeValueInput[]>([])
     );
-    const attributesWithoutAddedNewFiles = data.attributes
-      .filter(attribute =>
-        data.attributesWithNewFileValue.every(
-          attributeWithNewFileValue =>
-            attributeWithNewFileValue.id !== attribute.id
-        )
-      )
-      .map(attribute => {
-        if (attribute.data.inputType === AttributeInputTypeEnum.FILE) {
-          return {
-            file: attribute.value[0],
-            id: attribute.id,
-            values: []
-          };
-        }
-        return {
-          file: undefined,
-          id: attribute.id,
-          values: attribute.value[0] === "" ? [] : attribute.value
-        };
-      });
-    const attributesInput = [
-      ...attributesWithoutAddedNewFiles,
-      ...attributesWithAddedNewFiles
-    ];
 
     const result = await updateVariant({
       variables: {
         addStocks: data.addStocks.map(mapFormsetStockToStockInput),
-        attributes: attributesInput,
+        attributes: getAttributesVariables({
+          attributes: data.attributes,
+          attributesWithAddedNewFiles
+        }),
         costPrice: decimal(data.costPrice),
         id: variantId,
         price: decimal(data.price),

@@ -43,13 +43,23 @@ const props: ShippingZoneRatesPageProps = {
   channelErrors: [],
   disabled: false,
   errors: [],
+  isChecked: () => undefined,
   onBack: () => undefined,
   onChannelsChange: () => undefined,
   onDelete: () => undefined,
+  onNextPage: () => undefined,
+  onPreviousPage: () => undefined,
+  onProductAssign: () => undefined,
+  onProductUnassign: () => undefined,
   onSubmit: () => undefined,
   openChannelsModal: () => undefined,
+  rate: shippingZone.shippingMethods[0],
   saveButtonBarState: "default",
+  selected: 0,
   shippingChannels: defaultChannels,
+  toggle: () => undefined,
+  toggleAll: () => undefined,
+  toolbar: () => undefined,
   variant: ShippingMethodTypeEnum.PRICE
 };
 
@@ -77,7 +87,6 @@ storiesOf("Shipping / ShippingZoneRates page", module)
     <ShippingZoneRatesPage
       {...props}
       shippingChannels={channels}
-      rate={shippingZone.shippingMethods[0]}
       variant={ShippingMethodTypeEnum.WEIGHT}
     />
   ));

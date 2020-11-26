@@ -39,6 +39,14 @@ import {
   ShippingMethodChannelListingUpdateVariables
 } from "./types/ShippingMethodChannelListingUpdate";
 import {
+  ShippingPriceExcludeProduct,
+  ShippingPriceExcludeProductVariables
+} from "./types/ShippingPriceExcludeProduct";
+import {
+  ShippingPriceRemoveProductFromExclude,
+  ShippingPriceRemoveProductFromExcludeVariables
+} from "./types/ShippingPriceRemoveProductFromExclude";
+import {
   UpdateDefaultWeightUnit,
   UpdateDefaultWeightUnitVariables
 } from "./types/UpdateDefaultWeightUnit";
@@ -245,3 +253,38 @@ export const useShippingMethodChannelListingUpdate = makeMutation<
   ShippingMethodChannelListingUpdate,
   ShippingMethodChannelListingUpdateVariables
 >(shippingMethodChannelListingUpdate);
+
+export const shippingPriceExcludeProducts = gql`
+  ${shippingErrorFragment}
+  mutation ShippingPriceExcludeProduct(
+    $id: ID!
+    $input: ShippingPriceExcludeProductsInput!
+  ) {
+    shippingPriceExcludeProducts(id: $id, input: $input) {
+      errors: shippingErrors {
+        ...ShippingErrorFragment
+      }
+    }
+  }
+`;
+
+export const useShippingPriceExcludeProduct = makeMutation<
+  ShippingPriceExcludeProduct,
+  ShippingPriceExcludeProductVariables
+>(shippingPriceExcludeProducts);
+
+export const shippingPriceRemoveProductsFromExclude = gql`
+  ${shippingErrorFragment}
+  mutation ShippingPriceRemoveProductFromExclude($id: ID!, $products: [ID]!) {
+    shippingPriceRemoveProductFromExclude(id: $id, products: $products) {
+      errors: shippingErrors {
+        ...ShippingErrorFragment
+      }
+    }
+  }
+`;
+
+export const useShippingPriceRemoveProductsFromExclude = makeMutation<
+  ShippingPriceRemoveProductFromExclude,
+  ShippingPriceRemoveProductFromExcludeVariables
+>(shippingPriceRemoveProductsFromExclude);

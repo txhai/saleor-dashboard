@@ -9,8 +9,8 @@ import useChannels from "@saleor/hooks/useChannels";
 import useNavigator from "@saleor/hooks/useNavigator";
 import useNotifier from "@saleor/hooks/useNotifier";
 import { commonMessages, sectionNames } from "@saleor/intl";
+import ShippingZoneRatesCreatePage from "@saleor/shipping/components/ShippingZoneRatesCreatePage";
 import { FormData } from "@saleor/shipping/components/ShippingZoneRatesPage";
-import ShippingZoneRatesPage from "@saleor/shipping/components/ShippingZoneRatesPage";
 import {
   getCreateShippingWeightRateVariables,
   getShippingMethodChannelVariables
@@ -115,7 +115,7 @@ export const WeightRatesCreate: React.FC<WeightRatesCreateProps> = ({ id }) => {
           toggleAll={toggleAllChannels}
         />
       )}
-      <ShippingZoneRatesPage
+      <ShippingZoneRatesCreatePage
         allChannelsCount={allChannels?.length}
         shippingChannels={currentChannels}
         disabled={

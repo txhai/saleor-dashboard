@@ -17,6 +17,7 @@ export enum AccountErrorCode {
   DELETE_SUPERUSER_ACCOUNT = "DELETE_SUPERUSER_ACCOUNT",
   DUPLICATED_INPUT_ITEM = "DUPLICATED_INPUT_ITEM",
   GRAPHQL_ERROR = "GRAPHQL_ERROR",
+  INACTIVE = "INACTIVE",
   INVALID = "INVALID",
   INVALID_CREDENTIALS = "INVALID_CREDENTIALS",
   INVALID_PASSWORD = "INVALID_PASSWORD",
@@ -1652,6 +1653,12 @@ export interface ShippingMethodChannelListingAddInput {
 export interface ShippingMethodChannelListingInput {
   addChannels?: ShippingMethodChannelListingAddInput[] | null;
   removeChannels?: string[] | null;
+}
+
+export interface ShippingPriceExcludeProductsInput {
+  products?: (string | null)[] | null;
+  collections?: (string | null)[] | null;
+  categories?: (string | null)[] | null;
 }
 
 export interface ShippingPriceInput {

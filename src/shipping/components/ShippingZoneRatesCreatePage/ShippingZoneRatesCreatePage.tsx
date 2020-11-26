@@ -16,7 +16,6 @@ import OrderWeight from "@saleor/shipping/components/OrderWeight";
 import PricingCard from "@saleor/shipping/components/PricingCard";
 import ShippingZoneInfo from "@saleor/shipping/components/ShippingZoneInfo";
 import { createChannelsChangeHandler } from "@saleor/shipping/handlers";
-import { ShippingZone_shippingZone_shippingMethods } from "@saleor/shipping/types/ShippingZone";
 import { ShippingMethodTypeEnum } from "@saleor/types/globalTypes";
 import React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -35,7 +34,6 @@ export interface ShippingZoneRatesCreatePageProps {
   shippingChannels: ChannelShippingData[];
   disabled: boolean;
   hasChannelChanged?: boolean;
-  rate?: ShippingZone_shippingZone_shippingMethods;
   channelErrors: ShippingChannelsErrorFragment[];
   errors: ShippingErrorFragment[];
   saveButtonBarState: ConfirmButtonTransitionState;
@@ -59,7 +57,6 @@ export const ShippingZoneRatesCreatePage: React.FC<ShippingZoneRatesCreatePagePr
   onSubmit,
   onChannelsChange,
   openChannelsModal,
-  rate,
   saveButtonBarState,
   variant
 }) => {
@@ -67,11 +64,11 @@ export const ShippingZoneRatesCreatePage: React.FC<ShippingZoneRatesCreatePagePr
   const isPriceVariant = variant === ShippingMethodTypeEnum.PRICE;
   const initialForm: FormData = {
     channelListings: shippingChannels,
-    maxValue: rate?.maximumOrderWeight?.value.toString() || "",
-    minValue: rate?.minimumOrderWeight?.value.toString() || "",
-    name: rate?.name || "",
+    maxValue: "",
+    minValue: "",
+    name: "",
     noLimits: false,
-    type: rate?.type || null
+    type: null
   };
 
   return (
@@ -93,8 +90,7 @@ export const ShippingZoneRatesCreatePage: React.FC<ShippingZoneRatesCreatePagePr
             </AppHeader>
             <PageHeader
               title={
-                rate?.name ||
-                (isPriceVariant
+                isPriceVariant
                   ? intl.formatMessage({
                       defaultMessage: "Price Rate Create",
                       description: "page title"
@@ -102,7 +98,7 @@ export const ShippingZoneRatesCreatePage: React.FC<ShippingZoneRatesCreatePagePr
                   : intl.formatMessage({
                       defaultMessage: "Weight Rate Create",
                       description: "page title"
-                    }))
+                    })
               }
             />
             <Grid>

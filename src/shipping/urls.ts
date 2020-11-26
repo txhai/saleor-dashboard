@@ -27,7 +27,10 @@ export type ShippingZoneUrlDialog =
   | "remove-rate"
   | "unassign-country";
 
-export type ShippingMethodDialog = "assign-product" | "remove";
+export type ShippingMethodDialog =
+  | "assign-product"
+  | "unassign-product"
+  | "remove";
 
 export type ShippingMethodUrlQueryParams = Dialog<ShippingMethodDialog> &
   SingleAction &

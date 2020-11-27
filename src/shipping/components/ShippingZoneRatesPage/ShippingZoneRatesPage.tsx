@@ -18,11 +18,10 @@ import ShippingMethodProducts from "@saleor/shipping/components/ShippingMethodPr
 import ShippingZoneInfo from "@saleor/shipping/components/ShippingZoneInfo";
 import { createChannelsChangeHandler } from "@saleor/shipping/handlers";
 import { ShippingZone_shippingZone_shippingMethods } from "@saleor/shipping/types/ShippingZone";
+import { ListActions, ListProps } from "@saleor/types";
 import { ShippingMethodTypeEnum } from "@saleor/types/globalTypes";
 import React from "react";
 import { FormattedMessage } from "react-intl";
-
-import { ListActions, ListProps } from "../../../types";
 
 export interface FormData {
   channelListings: ChannelShippingData[];

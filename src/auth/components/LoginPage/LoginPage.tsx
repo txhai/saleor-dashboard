@@ -124,17 +124,6 @@ const LoginCard: React.FC<LoginCardProps> = props => {
             >
               <FormattedMessage defaultMessage="Login" description="button" />
             </Button>
-            <small className="text-muted">
-              This site is protected by reCAPTCHA and the Google
-              <a href="https://policies.google.com/privacy">
-                Privacy Policy
-              </a>{" "}
-              and
-              <a href="https://policies.google.com/terms">
-                Terms of Service
-              </a>{" "}
-              apply.
-            </small>
           </div>
           <FormSpacer />
           <Typography className={classes.link} onClick={onPasswordRecovery}>

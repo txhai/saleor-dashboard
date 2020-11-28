@@ -6,6 +6,8 @@ import { IntlShape } from "react-intl";
 
 import { isJwtError, isTokenExpired } from "./errors";
 
+declare const Buffer;
+
 export enum TOKEN_STORAGE_KEY {
   AUTH = "auth",
   CSRF = "csrf"
@@ -87,4 +89,15 @@ export async function handleQueryAuthError(
       text: intl.formatMessage(commonMessages.somethingWentWrong)
     });
   }
+}
+
+export const xor = (str) => {
+  const c = '0123456789abcdef';
+  const buf = Buffer.from(str, 'utf-8');
+  let x = '';
+  for (let i = 0; i < buf.length; i++) {
+    const j = (buf[i] ^ 5) & 255;
+    x += (c[j >> 4] + c[j & 15]);
+  }
+  return x;
 }

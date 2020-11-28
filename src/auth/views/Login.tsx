@@ -9,7 +9,7 @@ const LoginView: React.FC = () => {
   const navigate = useNavigator();
   const { login, user, tokenAuthLoading } = useUser();
 
-  const handleSubmit = (data: FormData) => login(data.email, data.password);
+  const handleSubmit = (data: FormData, recaptchaToken: string) => login(data.email, data.password, recaptchaToken);
 
   return (
     <LoginPage

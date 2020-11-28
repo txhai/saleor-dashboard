@@ -27,10 +27,28 @@ import {
   getTokens,
   removeTokens,
   setAuthToken,
-  setTokens
+  setTokens,
+  xor
 } from "./utils";
 
 const persistToken = false;
+
+class RecaptchaContext {
+  token: string;
+
+  constructor() {
+  }
+
+  setToken(recaptchaToken: string) {
+    this.token = recaptchaToken;
+  }
+
+  getToken() {
+    return this.token;
+  }
+}
+
+const ContextCaptcha = new RecaptchaContext();
 
 export function useAuthProvider(
   intl: IntlShape,
@@ -49,11 +67,14 @@ export function useAuthProvider(
     removeTokens();
   };
 
-  const [tokenAuth, tokenAuthResult] = useMutation<
-    TokenAuth,
-    TokenAuthVariables
-  >(tokenAuthMutation, {
+  const [tokenAuth, tokenAuthResult] = useMutation<TokenAuth,
+    TokenAuthVariables>(tokenAuthMutation, {
     client: apolloClient,
+    context: {
+      headers: {
+        'X-Recaptcha': xor(ContextCaptcha.getToken())
+      }
+    },
     onCompleted: result => {
       if (result.tokenCreate.errors.length > 0) {
         logout();
@@ -74,6 +95,7 @@ export function useAuthProvider(
     },
     onError: logout
   });
+
   const [tokenRefresh] = useMutation<RefreshToken, RefreshTokenVariables>(
     tokenRefreshMutation,
     {
@@ -81,10 +103,8 @@ export function useAuthProvider(
       onError: logout
     }
   );
-  const [tokenVerify, tokenVerifyResult] = useMutation<
-    VerifyToken,
-    VerifyTokenVariables
-  >(tokenVerifyMutation, {
+  const [tokenVerify, tokenVerifyResult] = useMutation<VerifyToken,
+    VerifyTokenVariables>(tokenVerifyMutation, {
     client: apolloClient,
     onCompleted: result => {
       if (result.tokenVerify === null) {
@@ -124,7 +144,9 @@ export function useAuthProvider(
     }
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, recaptchaToken: string) => {
+    ContextCaptcha.setToken(recaptchaToken);
+
     const result = await tokenAuth({ variables: { email, password } });
 
     if (result && !result.data.tokenCreate.errors.length) {

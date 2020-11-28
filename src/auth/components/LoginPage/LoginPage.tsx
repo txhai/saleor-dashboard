@@ -8,8 +8,8 @@ import { DEMO_MODE, RECAPTCHA_KEY } from "@saleor/config";
 import { commonMessages } from "@saleor/intl";
 import React from "react";
 import {
-  GoogleReCaptchaProvider,
-  useGoogleReCaptcha
+  GoogleReCaptcha,
+  GoogleReCaptchaProvider
 } from "react-google-recaptcha-v3";
 import { FormattedMessage, useIntl } from "react-intl";
 
@@ -49,12 +49,18 @@ export interface LoginCardProps {
   error: boolean;
   disableLoginButton: boolean;
   onPasswordRecovery: () => void;
-
-  onSubmit?(event: FormData, recaptchaToken: string);
+  onSubmit?(event: FormData);
+  onVerify?(token: string);
 }
 
 const LoginCard: React.FC<LoginCardProps> = props => {
-  const { error, disableLoginButton, onPasswordRecovery, onSubmit } = props;
+  const {
+    error,
+    disableLoginButton,
+    onPasswordRecovery,
+    onSubmit,
+    onVerify
+  } = props;
 
   const classes = useStyles(props);
   const intl = useIntl();
@@ -67,90 +73,83 @@ const LoginCard: React.FC<LoginCardProps> = props => {
     };
   }
 
-  const onFormSubmit = (event: FormData) => {
-    const { executeRecaptcha } = useGoogleReCaptcha();
-
-    (async () => {
-      const token = await executeRecaptcha("tokenCreate");
-      onSubmit(event, token);
-    })();
-  };
-
   return (
-    <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_KEY}>
-      <Form initial={initialFormData} onSubmit={onFormSubmit}>
-        {({ change: handleChange, data, submit: handleSubmit }) => (
-          <>
-            {error && (
-              <div className={classes.panel} data-test="loginErrorMessage">
-                <Typography variant="caption">
-                  <FormattedMessage defaultMessage="Sorry, your username and/or password are incorrect. Please try again." />
-                </Typography>
-              </div>
-            )}
-            <TextField
-              autoFocus
-              fullWidth
-              autoComplete="username"
-              label={intl.formatMessage(commonMessages.email)}
-              name="email"
-              onChange={handleChange}
-              value={data.email}
-              inputProps={{
-                "data-test": "email"
-              }}
-            />
-            <FormSpacer />
-            <TextField
-              fullWidth
-              autoComplete="password"
-              label={intl.formatMessage({
-                defaultMessage: "Password"
-              })}
-              name="password"
-              onChange={handleChange}
-              type="password"
-              value={data.password}
-              inputProps={{
-                "data-test": "password"
-              }}
-            />
-            <FormSpacer />
-            <div className={classes.buttonContainer}>
-              <Button
-                className={classes.loginButton}
-                color="primary"
-                disabled={disableLoginButton}
-                variant="contained"
-                onClick={handleSubmit}
-                type="submit"
-                data-test="submit"
-              >
-                <FormattedMessage defaultMessage="Login" description="button" />
-              </Button>
-              <small className="text-muted">
-                This site is protected by reCAPTCHA and the Google
-                <a href="https://policies.google.com/privacy">
-                  Privacy Policy
-                </a>{" "}
-                and
-                <a href="https://policies.google.com/terms">
-                  Terms of Service
-                </a>{" "}
-                apply.
-              </small>
+    <Form initial={initialFormData} onSubmit={onSubmit}>
+      {({ change: handleChange, data, submit: handleSubmit }) => (
+        <>
+          {error && (
+            <div className={classes.panel} data-test="loginErrorMessage">
+              <Typography variant="caption">
+                <FormattedMessage defaultMessage="Sorry, your username and/or password are incorrect. Please try again." />
+              </Typography>
             </div>
-            <FormSpacer />
-            <Typography className={classes.link} onClick={onPasswordRecovery}>
-              <FormattedMessage
-                defaultMessage="Reset your password"
-                description="button"
-              />
-            </Typography>
-          </>
-        )}
-      </Form>
-    </GoogleReCaptchaProvider>
+          )}
+          <TextField
+            autoFocus
+            fullWidth
+            autoComplete="username"
+            label={intl.formatMessage(commonMessages.email)}
+            name="email"
+            onChange={handleChange}
+            value={data.email}
+            inputProps={{
+              "data-test": "email"
+            }}
+          />
+          <FormSpacer />
+          <TextField
+            fullWidth
+            autoComplete="password"
+            label={intl.formatMessage({
+              defaultMessage: "Password"
+            })}
+            name="password"
+            onChange={handleChange}
+            type="password"
+            value={data.password}
+            inputProps={{
+              "data-test": "password"
+            }}
+          />
+          <FormSpacer />
+          <div className={classes.buttonContainer}>
+            <Button
+              className={classes.loginButton}
+              color="primary"
+              disabled={disableLoginButton}
+              variant="contained"
+              onClick={handleSubmit}
+              type="submit"
+              data-test="submit"
+            >
+              <FormattedMessage defaultMessage="Login" description="button" />
+            </Button>
+            <small className="text-muted">
+              This site is protected by reCAPTCHA and the Google
+              <a href="https://policies.google.com/privacy">
+                Privacy Policy
+              </a>{" "}
+              and
+              <a href="https://policies.google.com/terms">
+                Terms of Service
+              </a>{" "}
+              apply.
+            </small>
+          </div>
+          <FormSpacer />
+          <Typography className={classes.link} onClick={onPasswordRecovery}>
+            <FormattedMessage
+              defaultMessage="Reset your password"
+              description="button"
+            />
+          </Typography>
+
+          <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_KEY}>
+            <GoogleReCaptcha onVerify={onVerify} action={"tokenCreate"} />
+          </GoogleReCaptchaProvider>
+        </>
+      )}
+    </Form>
   );
 };
 LoginCard.displayName = "LoginCard";

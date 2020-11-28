@@ -36,7 +36,7 @@ describe("User", () => {
     const hook = renderAuthProvider(apolloClient);
 
     await act(() =>
-      hook.current.login(credentials.email, credentials.password, "token")
+      hook.current.login(credentials.email, credentials.password)
     );
     expect(hook.current.userContext.email).toBe(credentials.email);
     credentials.token = getTokens().auth;
@@ -48,7 +48,7 @@ describe("User", () => {
     const hook = renderAuthProvider(apolloClient);
 
     await act(() =>
-      hook.current.login(credentials.email, "NotAValidPassword123!", "token")
+      hook.current.login(credentials.email, "NotAValidPassword123!")
     );
     expect(hook.current.userContext).toBe(null);
 

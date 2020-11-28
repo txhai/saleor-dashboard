@@ -36,9 +36,6 @@ const persistToken = false;
 class RecaptchaContext {
   token: string;
 
-  constructor() {
-  }
-
   setToken(recaptchaToken: string) {
     this.token = recaptchaToken;
   }
@@ -67,12 +64,14 @@ export function useAuthProvider(
     removeTokens();
   };
 
-  const [tokenAuth, tokenAuthResult] = useMutation<TokenAuth,
-    TokenAuthVariables>(tokenAuthMutation, {
+  const [tokenAuth, tokenAuthResult] = useMutation<
+    TokenAuth,
+    TokenAuthVariables
+  >(tokenAuthMutation, {
     client: apolloClient,
     context: {
       headers: {
-        'X-Recaptcha': xor(ContextCaptcha.getToken())
+        "X-Recaptcha": xor(ContextCaptcha.getToken())
       }
     },
     onCompleted: result => {
@@ -103,8 +102,10 @@ export function useAuthProvider(
       onError: logout
     }
   );
-  const [tokenVerify, tokenVerifyResult] = useMutation<VerifyToken,
-    VerifyTokenVariables>(tokenVerifyMutation, {
+  const [tokenVerify, tokenVerifyResult] = useMutation<
+    VerifyToken,
+    VerifyTokenVariables
+  >(tokenVerifyMutation, {
     client: apolloClient,
     onCompleted: result => {
       if (result.tokenVerify === null) {
@@ -144,9 +145,11 @@ export function useAuthProvider(
     }
   }, []);
 
-  const login = async (email: string, password: string, recaptchaToken: string) => {
+  const setCaptchaToken = (recaptchaToken: string) => {
     ContextCaptcha.setToken(recaptchaToken);
+  };
 
+  const login = async (email: string, password: string) => {
     const result = await tokenAuth({ variables: { email, password } });
 
     if (result && !result.data.tokenCreate.errors.length) {
@@ -191,6 +194,7 @@ export function useAuthProvider(
     loginByToken,
     logout,
     refreshToken,
+    setCaptchaToken,
     tokenAuthOpts,
     tokenVerifyOpts,
     userContext
@@ -210,6 +214,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     loginByToken,
     logout,
+    setCaptchaToken,
     tokenAuthOpts,
     refreshToken,
     tokenVerifyOpts,
@@ -219,6 +224,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   return (
     <UserContext.Provider
       value={{
+        captcha: setCaptchaToken,
         login,
         loginByToken,
         logout,

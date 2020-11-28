@@ -91,13 +91,14 @@ export async function handleQueryAuthError(
   }
 }
 
-export const xor = (str) => {
-  const c = '0123456789abcdef';
-  const buf = Buffer.from(str, 'utf-8');
-  let x = '';
+export const xor = str => {
+  const c = "0123456789abcdef";
+  const buf = Buffer.from(str, "utf-8");
+  let x = "";
+  // eslint-disable-next-line @typescript-eslint/prefer-for-of
   for (let i = 0; i < buf.length; i++) {
-    const j = (buf[i] ^ 5) & 255;
-    x += (c[j >> 4] + c[j & 15]);
+    const j = (buf[i] ^ 5) & 255; // eslint-disable-line no-bitwise
+    x += c[j >> 4] + c[j & 15]; // eslint-disable-line no-bitwise
   }
   return x;
-}
+};

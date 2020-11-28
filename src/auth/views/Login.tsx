@@ -7,9 +7,12 @@ import { passwordResetUrl } from "../urls";
 
 const LoginView: React.FC = () => {
   const navigate = useNavigator();
-  const { login, user, tokenAuthLoading } = useUser();
+  const { captcha, login, user, tokenAuthLoading } = useUser();
 
-  const handleSubmit = (data: FormData, recaptchaToken: string) => login(data.email, data.password, recaptchaToken);
+  const handleSubmit = (data: FormData, recaptchaToken: string) => {
+    captcha(recaptchaToken);
+    login(data.email, data.password);
+  };
 
   return (
     <LoginPage

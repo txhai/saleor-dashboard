@@ -4,16 +4,14 @@ import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import Form from "@saleor/components/Form";
 import { FormSpacer } from "@saleor/components/FormSpacer";
-import { DEMO_MODE } from "@saleor/config";
+import { DEMO_MODE, RECAPTCHA_KEY } from "@saleor/config";
 import { commonMessages } from "@saleor/intl";
 import React from "react";
-import { FormattedMessage, useIntl } from "react-intl";
-import {RECAPTCHA_KEY } from '../../config'
-
 import {
   GoogleReCaptchaProvider,
   useGoogleReCaptcha
-} from 'react-google-recaptcha-v3';
+} from "react-google-recaptcha-v3";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export interface FormData {
   email: string;
@@ -70,9 +68,12 @@ const LoginCard: React.FC<LoginCardProps> = props => {
 
   const onFormSubmit = (event: FormData) => {
     const { executeRecaptcha } = useGoogleReCaptcha();
-    const token = executeRecaptcha("tokenCreate");
-    onSubmit(event, token)
-  }
+
+    (async () => {
+      const token = await executeRecaptcha("tokenCreate");
+      onSubmit(event, token);
+    })();
+  };
 
   return (
     <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_KEY}>

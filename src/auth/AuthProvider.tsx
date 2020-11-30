@@ -42,6 +42,10 @@ const persistToken = false;
 class RecaptchaContext {
   token: string;
 
+  constructor() {
+    this.token = "empty";
+  }
+
   setToken(recaptchaToken: string) {
     this.token = recaptchaToken;
   }

@@ -1,5 +1,5 @@
 import { IMessageContext } from "@saleor/components/messages";
-import { DEMO_MODE } from "@saleor/config";
+import { DEMO_MODE, RECAPTCHA_KEY } from "@saleor/config";
 import { User } from "@saleor/fragments/types/User";
 import useNotifier from "@saleor/hooks/useNotifier";
 import { getMutationStatus } from "@saleor/misc";
@@ -30,6 +30,12 @@ import {
   setTokens,
   xor
 } from "./utils";
+
+declare global {
+  interface Window {
+    grecaptcha: any;
+  }
+}
 
 const persistToken = false;
 
@@ -145,11 +151,20 @@ export function useAuthProvider(
     }
   }, []);
 
-  const setCaptchaToken = (recaptchaToken: string) => {
-    ContextCaptcha.setToken(recaptchaToken);
-  };
-
   const login = async (email: string, password: string) => {
+    // Get recaptcha token
+    const token: string = await new Promise(resolve => {
+      window.grecaptcha.ready(() => {
+        window.grecaptcha
+          .execute(RECAPTCHA_KEY, { action: "tokenCreate" })
+          .then(token => {
+            resolve(token);
+          });
+      });
+    });
+
+    ContextCaptcha.setToken(token);
+
     const result = await tokenAuth({ variables: { email, password } });
 
     if (result && !result.data.tokenCreate.errors.length) {
@@ -194,7 +209,6 @@ export function useAuthProvider(
     loginByToken,
     logout,
     refreshToken,
-    setCaptchaToken,
     tokenAuthOpts,
     tokenVerifyOpts,
     userContext
@@ -214,7 +228,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     loginByToken,
     logout,
-    setCaptchaToken,
     tokenAuthOpts,
     refreshToken,
     tokenVerifyOpts,
@@ -224,7 +237,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   return (
     <UserContext.Provider
       value={{
-        captcha: setCaptchaToken,
         login,
         loginByToken,
         logout,

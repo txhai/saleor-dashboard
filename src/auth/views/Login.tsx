@@ -7,14 +7,10 @@ import { passwordResetUrl } from "../urls";
 
 const LoginView: React.FC = () => {
   const navigate = useNavigator();
-  const { captcha, login, user, tokenAuthLoading } = useUser();
+  const { login, user, tokenAuthLoading } = useUser();
 
   const handleSubmit = (data: FormData) => {
     login(data.email, data.password);
-  };
-
-  const handleVerify = (token: string) => {
-    captcha(token);
   };
 
   return (
@@ -23,7 +19,6 @@ const LoginView: React.FC = () => {
       disableLoginButton={tokenAuthLoading}
       onPasswordRecovery={() => navigate(passwordResetUrl)}
       onSubmit={handleSubmit}
-      onVerify={handleVerify}
     />
   );
 };

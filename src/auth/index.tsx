@@ -21,11 +21,9 @@ interface UserContext {
   tokenRefresh: () => Promise<boolean>;
   tokenVerifyLoading: boolean;
   user?: User;
-  captcha: (token: string) => void;
 }
 
 export const UserContext = React.createContext<UserContext>({
-  captcha: undefined,
   login: undefined,
   loginByToken: undefined,
   logout: undefined,

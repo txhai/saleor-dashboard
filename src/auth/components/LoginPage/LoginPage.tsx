@@ -7,10 +7,7 @@ import { FormSpacer } from "@saleor/components/FormSpacer";
 import { DEMO_MODE, RECAPTCHA_KEY } from "@saleor/config";
 import { commonMessages } from "@saleor/intl";
 import React from "react";
-import {
-  GoogleReCaptcha,
-  GoogleReCaptchaProvider
-} from "react-google-recaptcha-v3";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { FormattedMessage, useIntl } from "react-intl";
 
 export interface FormData {
@@ -50,17 +47,10 @@ export interface LoginCardProps {
   disableLoginButton: boolean;
   onPasswordRecovery: () => void;
   onSubmit?(event: FormData);
-  onVerify?(token: string);
 }
 
 const LoginCard: React.FC<LoginCardProps> = props => {
-  const {
-    error,
-    disableLoginButton,
-    onPasswordRecovery,
-    onSubmit,
-    onVerify
-  } = props;
+  const { error, disableLoginButton, onPasswordRecovery, onSubmit } = props;
 
   const classes = useStyles(props);
   const intl = useIntl();
@@ -133,9 +123,9 @@ const LoginCard: React.FC<LoginCardProps> = props => {
             />
           </Typography>
 
-          <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_KEY}>
-            <GoogleReCaptcha onVerify={onVerify} action={"tokenCreate"} />
-          </GoogleReCaptchaProvider>
+          <GoogleReCaptchaProvider
+            reCaptchaKey={RECAPTCHA_KEY}
+          ></GoogleReCaptchaProvider>
         </>
       )}
     </Form>
